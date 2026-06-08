@@ -1,5 +1,5 @@
 // sw.js — Meu Diário PWA v5.0
-const CACHE = 'diario-v8-0';
+const CACHE = 'diario-v9-0';
 const SHELL = ['./','./index.html','./manifest.json','./icons/icon-192.png','./icons/icon-512.png'];
 const IGNORE = ['supabase.co','supabase.in','googleapis.com','gstatic.com','openstreetmap.org','nominatim','unpkg.com','tile.openstreetmap','tesseract'];
 

@@ -1,6 +1,14 @@
-# 📔 Meu Diário — PWA (v8.0)
+# 📔 Meu Diário — PWA (v9.0)
 
 Diário pessoal **offline-first** para **PC, iPad, Android e iPhone**: calendário, lembretes por voz, diário com humor, hábitos e medidas, fotos com GPS, marcação nas fotos, mapa, linha do tempo, estatísticas e **sincronização com conta (login e senha)**.
+
+## 🍽️ Nutrição & ajustes visuais (v9)
+
+Nova aba **Nutrição** em **Hábitos & Medidas**:
+- **Registro de refeições** — anote o que comeu por refeição (sem contagem de calorias/macros); ótimo para levar ao nutricionista.
+- **Medicamentos** — cadastre com a **dose indicada pelo seu médico**, frequência e próxima aplicação; marque quando tomou e acompanhe o histórico. O app só registra e acompanha — **não sugere dose**.
+
+Planos alimentares sob medida e ajustes de medicação devem ser feitos com médico e nutricionista. Também foram ajustados os campos das abas Calculadoras/Nutrição para um visual mais acabado.
 
 ## 🧮 Calculadoras (v8)
 

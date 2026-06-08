@@ -132,6 +132,11 @@ input,textarea,select{font-family:inherit;font-size:var(--fs)}
 .fld input:focus,.fld textarea:focus,.fld select:focus{border-color:var(--acc)}
 .fld textarea{resize:vertical;min-height:90px}
 .fld .row{display:flex;gap:10px}
+#trk-calc .row,#trk-nutri .row{display:flex;gap:10px;margin-bottom:14px}
+#trk-calc .row>div,#trk-nutri .row>div{flex:1;min-width:0}
+#trk-calc label,#trk-nutri label{display:block;font-size:13px;font-weight:600;color:var(--txt2);margin-bottom:7px}
+#trk-calc input,#trk-calc select,#trk-nutri input,#trk-nutri select,#trk-nutri textarea{width:100%;background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:13px 14px;color:var(--txt);outline:none}
+#trk-calc input:focus,#trk-calc select:focus,#trk-nutri input:focus,#trk-nutri select:focus,#trk-nutri textarea:focus{border-color:var(--acc)}
 .fld .row>*{flex:1}
 .chips{display:flex;gap:8px;flex-wrap:wrap}
 .chip{padding:9px 15px;border-radius:20px;background:var(--bg2);border:1px solid var(--line);font-size:13px;font-weight:600;color:var(--txt2);transition:.12s}
@@ -702,10 +707,12 @@ input,textarea,select{font-family:inherit;font-size:var(--fs)}
       <button class="on" onclick="Track.aba('habitos',this)">Hábitos</button>
       <button onclick="Track.aba('medidas',this)">Medidas</button>
       <button onclick="Track.aba('calc',this)">Calculadoras</button>
+      <button onclick="Track.aba('nutri',this)">Nutrição</button>
     </div>
     <div id="trk-habitos"></div>
     <div id="trk-medidas" class="hidden"></div>
     <div id="trk-calc" class="hidden"></div>
+    <div id="trk-nutri" class="hidden"></div>
   </div>
 </div>
 
@@ -785,7 +792,7 @@ input,textarea,select{font-family:inherit;font-size:var(--fs)}
    geocodificação reversa, múltiplas fotos, cadernos/categorias,
    favoritos, aviso de conflito de sync, modo foco.
    ============================================================ */
-const VER='8.0';
+const VER='9.0';
 const LS={ user:'md_user', recs:'md_recs', cfg:'md_cfg', sync:'md_lastsync', theme:'md_theme', fs:'md_fs', pin:'md_pin', nb:'md_notebooks' };
 // Configuração de nuvem pré-definida (Supabase). A chave anon é pública por design
 // e protegida por RLS no servidor. Pode ser sobrescrita em Perfil → Sincronização.
@@ -1574,6 +1581,59 @@ const Calc={
   }
 };
 
+/* ============================================================
+   v9 — Nutrição: registro de refeições + acompanhamento de medicamentos
+   Sem prescrição, sem cálculo de dose e sem metas numéricas.
+   ============================================================ */
+const LS_MEALS='md_meals', LS_MEDS='md_meds';
+const Nutri={
+  meals(){ try{ return JSON.parse(localStorage.getItem(LS_MEALS)||'[]'); }catch{ return []; } },
+  saveMeals(a){ localStorage.setItem(LS_MEALS,JSON.stringify(a)); },
+  meds(){ try{ return JSON.parse(localStorage.getItem(LS_MEDS)||'[]'); }catch{ return []; } },
+  saveMeds(a){ localStorage.setItem(LS_MEDS,JSON.stringify(a)); },
+  _adv(ds,freq){ const d=new Date(ds+'T00:00:00'); if(freq==='diaria')d.setDate(d.getDate()+1); else if(freq==='semanal')d.setDate(d.getDate()+7); else if(freq==='quinzenal')d.setDate(d.getDate()+14); else if(freq==='mensal')d.setMonth(d.getMonth()+1); else return ds; return fmtDate(d); },
+  freqLabel(f){ return {diaria:'Diária',semanal:'Semanal',quinzenal:'Quinzenal',mensal:'Mensal',outra:'Outra'}[f]||f; },
+
+  render(){
+    $('trk-nutri').innerHTML=`
+      <div class="card"><div class="card-t">🍽️ Registro de refeições</div>
+        <p style="font-size:12px;color:var(--txt3);margin-bottom:10px">Anote o que comeu — bom pra acompanhar e pra levar na consulta.</p>
+        <div class="row">
+          <div><label>Data</label><input type="date" id="ref-data" value="${todayStr()}"></div>
+          <div><label>Refeição</label><select id="ref-tipo"><option>Café da manhã</option><option>Almoço</option><option>Lanche</option><option>Jantar</option><option>Ceia</option><option>Outro</option></select></div>
+        </div>
+        <div class="fld"><label>O que você comeu</label><textarea id="ref-desc" placeholder="Ex.: omelete com salada e arroz"></textarea></div>
+        <button class="btn" onclick="Nutri.addRefeicao()">Adicionar refeição</button>
+        <div id="ref-lista" style="margin-top:14px"></div>
+      </div>
+
+      <div class="card"><div class="card-t">💊 Medicamentos</div>
+        <p style="font-size:12px;color:var(--txt3);margin-bottom:10px">Cadastre com a dose que o seu médico indicou. O app acompanha as datas e guarda o histórico — não sugere dose.</p>
+        <div class="fld"><label>Nome</label><input id="med-nome" placeholder="Ex.: nome do medicamento"></div>
+        <div class="row">
+          <div><label>Dose (conforme o médico)</label><input id="med-dose" placeholder="o que foi prescrito"></div>
+          <div><label>Frequência</label><select id="med-freq"><option value="diaria">Diária</option><option value="semanal" selected>Semanal</option><option value="quinzenal">Quinzenal</option><option value="mensal">Mensal</option><option value="outra">Outra</option></select></div>
+        </div>
+        <div class="fld"><label>Próxima aplicação/tomada</label><input type="date" id="med-prox" value="${todayStr()}"></div>
+        <button class="btn" onclick="Nutri.addMed()">Adicionar medicamento</button>
+        <div id="med-lista" style="margin-top:14px"></div>
+      </div>
+
+      <div class="card" style="background:var(--card2)"><p style="font-size:12px;color:var(--txt2);margin:0">Para um plano alimentar sob medida e ajustes do tratamento, combine com o seu médico e nutricionista — ainda mais com medicação em uso. Este espaço é para registrar e acompanhar.</p></div>
+    `;
+    Nutri.listRefeicoes(); Nutri.listMeds();
+  },
+
+  addRefeicao(){ const data=$('ref-data').value||todayStr(); const tipo=$('ref-tipo').value; const desc=($('ref-desc').value||'').trim(); if(!desc){ toast('Escreva o que comeu'); return; } const a=Nutri.meals(); a.push({id:'rf'+uid(),data,tipo,desc}); Nutri.saveMeals(a); $('ref-desc').value=''; Nutri.listRefeicoes(); toast('Refeição registrada ✓'); },
+  delRefeicao(id){ if(!confirm('Remover este registro?')) return; Nutri.saveMeals(Nutri.meals().filter(m=>m.id!==id)); Nutri.listRefeicoes(); },
+  listRefeicoes(){ const a=Nutri.meals().slice().sort((x,y)=>(y.data+y.id).localeCompare(x.data+x.id)).slice(0,30); $('ref-lista').innerHTML=a.length?a.map(m=>`<div style="padding:10px 0;border-bottom:1px solid var(--line)"><div style="display:flex;justify-content:space-between;align-items:center"><b style="font-size:13px">${esc(m.tipo)} · ${fmtBR(m.data)}</b><button onclick="Nutri.delRefeicao('${m.id}')" style="background:none;border:none;color:var(--txt3);cursor:pointer;font-size:15px">✕</button></div><div style="font-size:13px;color:var(--txt2);margin-top:2px">${esc(m.desc)}</div></div>`).join(''):'<p style="font-size:13px;color:var(--txt3)">Nenhuma refeição registrada ainda.</p>'; },
+
+  addMed(){ const nome=($('med-nome').value||'').trim(); const dose=($('med-dose').value||'').trim(); const freq=$('med-freq').value; const prox=$('med-prox').value||todayStr(); if(!nome){ toast('Informe o nome do medicamento'); return; } const a=Nutri.meds(); a.push({id:'md'+uid(),nome,dose,freq,prox,hist:[]}); Nutri.saveMeds(a); $('med-nome').value=''; $('med-dose').value=''; Nutri.listMeds(); toast('Medicamento adicionado ✓'); },
+  registrarDose(id){ const a=Nutri.meds(); const m=a.find(x=>x.id===id); if(!m) return; const hoje=todayStr(); m.hist=m.hist||[]; m.hist.push(hoje); m.prox=Nutri._adv(m.prox<hoje?hoje:m.prox,m.freq); Nutri.saveMeds(a); Nutri.listMeds(); toast('Registrado ✓'); },
+  delMed(id){ if(!confirm('Remover este medicamento e o histórico?')) return; Nutri.saveMeds(Nutri.meds().filter(m=>m.id!==id)); Nutri.listMeds(); },
+  listMeds(){ const a=Nutri.meds(); $('med-lista').innerHTML=a.length?a.map(m=>{ const atras=m.prox<todayStr(); const ult=(m.hist&&m.hist.length)?fmtBR(m.hist[m.hist.length-1]):'—'; return `<div style="padding:12px;border:1px solid var(--line);border-radius:12px;margin-bottom:10px"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><b>${esc(m.nome)}</b>${m.dose?` · ${esc(m.dose)}`:''}<div style="font-size:12px;color:var(--txt3);margin-top:2px">${Nutri.freqLabel(m.freq)} · última: ${ult}</div></div><button onclick="Nutri.delMed('${m.id}')" style="background:none;border:none;color:var(--txt3);cursor:pointer;font-size:15px">✕</button></div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;gap:8px"><span style="font-size:13px;color:${atras?'var(--red)':'var(--txt2)'}">Próxima: ${fmtBR(m.prox)}${atras?' (atrasada)':''}</span><button class="btn sec" style="width:auto;padding:6px 14px;font-size:13px" onclick="Nutri.registrarDose('${m.id}')">✓ Registrei</button></div></div>`; }).join(''):'<p style="font-size:13px;color:var(--txt3)">Nenhum medicamento cadastrado.</p>'; }
+};
+
 /* ---------- MODO FOCO ---------- */
 const Focus={
   abrir(){ $('focus-date').textContent=nomeDiaCompleto(todayStr()); $('focus-text').value=''; $('focus-mode').classList.add('on'); setTimeout(()=>$('focus-text').focus(),200); },
@@ -2159,7 +2219,7 @@ const Track={
   metLog(){ try{ return JSON.parse(localStorage.getItem(LS_METLOG)||'{}'); }catch{ return {}; } },
   saveHab(a){ localStorage.setItem(LS_HAB,JSON.stringify(a)); }, saveHabLog(o){ localStorage.setItem(LS_HABLOG,JSON.stringify(o)); },
   saveMet(a){ localStorage.setItem(LS_MET,JSON.stringify(a)); }, saveMetLog(o){ localStorage.setItem(LS_METLOG,JSON.stringify(o)); },
-  aba(a,el){ document.querySelectorAll('#trk-seg button').forEach(b=>b.classList.remove('on')); el.classList.add('on'); $('trk-habitos').classList.toggle('hidden',a!=='habitos'); $('trk-medidas').classList.toggle('hidden',a!=='medidas'); $('trk-calc').classList.toggle('hidden',a!=='calc'); if(a==='habitos') Track.renderHabitos(); else if(a==='medidas') Track.renderMedidas(); else Calc.render(); },
+  aba(a,el){ document.querySelectorAll('#trk-seg button').forEach(b=>b.classList.remove('on')); el.classList.add('on'); ['habitos','medidas','calc','nutri'].forEach(k=>$('trk-'+k).classList.toggle('hidden',a!==k)); if(a==='habitos') Track.renderHabitos(); else if(a==='medidas') Track.renderMedidas(); else if(a==='calc') Calc.render(); else Nutri.render(); },
   render(){ $('trk-sub').textContent=`${Track.habits().length} hábito(s) · ${Track.metrics().length} medida(s)`; Track.renderHabitos(); },
   // ---- Hábitos (sim/não diário) ----
   streak(hid){ const log=Track.habLog(); let s=0; let d=new Date(); d.setHours(0,0,0,0); const done=ds=>log[ds]&&log[ds].includes(hid); if(!done(fmtDate(d))) d.setDate(d.getDate()-1); while(done(fmtDate(d))){ s++; d.setDate(d.getDate()-1); } return s; },

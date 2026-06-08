@@ -2,7 +2,7 @@
   "name": "Meu Diário",
   "short_name": "Diário",
   "description": "Diário pessoal: calendário, lembretes por voz, fotos com GPS, humor, cadernos, hábitos, mapa e estatísticas.",
-  "start_url": "./index.html?v=8_0",
+  "start_url": "./index.html?v=9_0",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
