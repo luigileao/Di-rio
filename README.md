@@ -1,6 +1,26 @@
-# 📔 Meu Diário — PWA (v6.0)
+# 📔 Meu Diário — PWA (v7.0)
 
 Diário pessoal **offline-first** para **PC, iPad, Android e iPhone**: calendário, lembretes por voz, diário com humor, hábitos e medidas, fotos com GPS, marcação nas fotos, mapa, linha do tempo, estatísticas e **sincronização com conta (login e senha)**.
+
+## 🆕 Novidades da v7
+
+**Escrever com mais constância**
+- **💡 Inspiração** — banco de perguntas reflexivas para destravar a escrita (botão no editor).
+- **📋 Modelos** — estruturas prontas: gratidão, reflexão, viagem, sonho, treino, trabalho, metas.
+- **🔥 Sequência de escrita** — conta dias seguidos escrevendo, com recorde e conquistas.
+
+**Visualizar e entender (tela ✨ Insights)**
+- **Ano em Pixels** — o ano inteiro com cada dia colorido pelo seu humor.
+- **Humor × Hábitos** — descubra o que melhora seus dias.
+- **Painel de escrita** — páginas, sequência, recorde, palavras e páginas por mês.
+
+**Exportar e compartilhar**
+- **Livro do diário** — exportação com capa e sumário por mês (botão 📄 no Diário → Imprimir/Salvar PDF).
+- **🖼️ Card de imagem** — gere uma imagem bonita de uma página (na tela de leitura) para guardar ou compartilhar.
+- **📍 Clima automático** — preenche o tempo do dia pela sua localização.
+
+**Navegação**
+- Novo menu **☰ Mais** no celular dá acesso a Insights, Hábitos, Linha do tempo, Mapa, Antes/Depois, Buscar e Lixeira.
 
 ## 🔐 Conta e sincronização (NOVO na v6 — login e senha)
 

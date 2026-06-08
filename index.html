@@ -468,7 +468,7 @@ input,textarea,select{font-family:inherit;font-size:var(--fs)}
   </div>
 </div>
 <div class="reader" id="reader">
-  <div class="rhead"><button class="hd-btn back" onclick="Reader.fechar()">‹</button><h1 style="font-size:17px">Leitura</h1></div>
+  <div class="rhead"><button class="hd-btn back" onclick="Reader.fechar()">‹</button><h1 style="font-size:17px;flex:1">Leitura</h1><button class="hd-btn" onclick="Reader.card()">🖼️</button></div>
   <div class="rbody" id="reader-body"></div>
 </div>
 <div id="toast" class="toast"></div>
@@ -515,6 +515,7 @@ input,textarea,select{font-family:inherit;font-size:var(--fs)}
   <button class="snav" id="sn-s-diary" onclick="App.go('s-diary')"><span class="si">📔</span> Diário</button>
   <button class="snav" id="sn-s-timeline" onclick="App.go('s-timeline')"><span class="si">🧭</span> Linha do tempo</button>
   <button class="snav" id="sn-s-track" onclick="App.go('s-track')"><span class="si">📈</span> Hábitos</button>
+  <button class="snav" id="sn-s-insights" onclick="App.go('s-insights')"><span class="si">✨</span> Insights</button>
   <button class="snav" id="sn-s-photo" onclick="App.go('s-photo')"><span class="si">📷</span> Fotos</button>
   <button class="snav" id="sn-s-fotomapa" onclick="App.go('s-fotomapa')"><span class="si">🗺️</span> Mapa</button>
   <button class="snav" id="sn-s-search" onclick="App.go('s-search')"><span class="si">🔍</span> Buscar</button>
@@ -566,6 +567,7 @@ input,textarea,select{font-family:inherit;font-size:var(--fs)}
   <div class="hd"><h1>Diário</h1><div class="sub" id="diary-sub"></div>
     <button class="hd-btn" id="priv-btn" onclick="Diary.togglePrivados()">🔒</button><button class="hd-btn" onclick="Focus.abrir()">✍️</button><button class="hd-btn" onclick="Diary.exportarPDF()">📄</button></div>
   <div class="ct">
+    <div id="diary-streak"></div>
     <div class="seg" id="diary-seg">
       <button class="on" onclick="Diary.aba('entradas',this)">Entradas</button>
       <button onclick="Diary.aba('humor',this)">Humor</button>
@@ -684,6 +686,15 @@ input,textarea,select{font-family:inherit;font-size:var(--fs)}
 </div>
 
 <!-- HÁBITOS & MEDIDAS -->
+<div id="s-insights" class="scr">
+  <div class="hd"><h1>✨ Insights</h1><div class="sub">Seus padrões e sua escrita</div></div>
+  <div class="ct">
+    <div id="ins-escrita"></div>
+    <div id="ins-pixels"></div>
+    <div id="ins-hh"></div>
+  </div>
+</div>
+
 <div id="s-track" class="scr">
   <div class="hd"><h1>Hábitos & Medidas</h1><div class="sub" id="trk-sub"></div></div>
   <div class="ct">
@@ -714,6 +725,7 @@ input,textarea,select{font-family:inherit;font-size:var(--fs)}
   <button id="nv2" onclick="App.go('s-diary')"><span class="ni">📔</span>Diário</button>
   <button id="nv3" onclick="App.go('s-photo')"><span class="ni">📷</span>Fotos</button>
   <button id="nv4" onclick="App.go('s-perfil')"><span class="ni">⚙️</span>Perfil</button>
+  <button id="nv-mais" onclick="UI.abrirSheet('mais')"><span class="ni">☰</span>Mais</button>
 </div>
 <button class="fab hidden" id="fab" onclick="UI.abrirNovo()">+</button>
 
@@ -726,6 +738,19 @@ input,textarea,select{font-family:inherit;font-size:var(--fs)}
   <div class="opt" onclick="UI.novoLembrete()"><div class="oi it-rm">⏰</div><div class="ob"><h3>Lembrete / Atividade</h3><p>Tarefa com alarme e recorrência</p></div></div>
   <div class="opt" onclick="UI.novoDiario()"><div class="oi it-di">📔</div><div class="ob"><h3>Página de diário</h3><p>Texto, fotos, áudio, humor e caderno</p></div></div>
   <div class="opt" onclick="UI.novaFoto()"><div class="oi it-ph">📷</div><div class="ob"><h3>Foto com GPS</h3><p>Relatório fotográfico georreferenciado</p></div></div>
+</div>
+
+<!-- SHEET MAIS (acesso às demais telas no celular) -->
+<div class="sheet-bg" id="sb-mais" onclick="UI.fecharSheet('mais')"></div>
+<div class="sheet" id="sh-mais">
+  <div class="grab"></div><h2>Mais</h2>
+  <div class="opt" onclick="UI.fecharSheet('mais');App.go('s-insights')"><div class="oi it-di">✨</div><div class="ob"><h3>Insights</h3><p>Ano em Pixels, humor × hábitos e sua escrita</p></div></div>
+  <div class="opt" onclick="UI.fecharSheet('mais');App.go('s-track')"><div class="oi it-rm">📈</div><div class="ob"><h3>Hábitos & Medidas</h3><p>Acompanhe hábitos e números do dia a dia</p></div></div>
+  <div class="opt" onclick="UI.fecharSheet('mais');App.go('s-timeline')"><div class="oi it-ev">🧭</div><div class="ob"><h3>Linha do tempo</h3><p>Suas páginas em ordem cronológica</p></div></div>
+  <div class="opt" onclick="UI.fecharSheet('mais');App.go('s-fotomapa')"><div class="oi it-ph">🗺️</div><div class="ob"><h3>Mapa de fotos</h3><p>Onde suas fotos foram tiradas</p></div></div>
+  <div class="opt" onclick="UI.fecharSheet('mais');App.go('s-bavb')"><div class="oi it-ph">🪞</div><div class="ob"><h3>Antes / Depois</h3><p>Compare duas fotos lado a lado</p></div></div>
+  <div class="opt" onclick="UI.fecharSheet('mais');App.go('s-search')"><div class="oi it-rm">🔍</div><div class="ob"><h3>Buscar</h3><p>Encontre qualquer registro</p></div></div>
+  <div class="opt" onclick="UI.fecharSheet('mais');App.go('s-trash')"><div class="oi it-rm">🗑️</div><div class="ob"><h3>Lixeira</h3><p>Itens excluídos nos últimos 30 dias</p></div></div>
 </div>
 
 <!-- SHEET VOZ -->
@@ -758,7 +783,7 @@ input,textarea,select{font-family:inherit;font-size:var(--fs)}
    geocodificação reversa, múltiplas fotos, cadernos/categorias,
    favoritos, aviso de conflito de sync, modo foco.
    ============================================================ */
-const VER='6.0';
+const VER='7.0';
 const LS={ user:'md_user', recs:'md_recs', cfg:'md_cfg', sync:'md_lastsync', theme:'md_theme', fs:'md_fs', pin:'md_pin', nb:'md_notebooks' };
 // Configuração de nuvem pré-definida (Supabase). A chave anon é pública por design
 // e protegida por RLS no servidor. Pode ser sobrescrita em Perfil → Sincronização.
@@ -870,6 +895,7 @@ const App={
     if(id==='s-timeline') Timeline.render();
     if(id==='s-fotomapa') FotoMapa.render();
     if(id==='s-track') Track.render();
+    if(id==='s-insights') Insights.render();
     if(id==='s-bavb') BeforeAfter.render();
     if(id==='s-search'){ setTimeout(()=>$('search-input').focus(),200); }
   },
@@ -1122,10 +1148,11 @@ const Diary={
   filtroNb(id){ S.diaryNb=S.diaryNb===id?null:id; Diary.render(); },
   render(){
     $('diary-sub').textContent=`${porTipo('diario').length} página(s)`; { const pb=$('priv-btn'); if(pb){ const temPriv=S.notebooks.some(n=>n.privado); pb.style.display=temPriv?'grid':'none'; pb.textContent=Privado.revelado?'🔓':'🔒'; } }
-    ['diary-list','diary-mood','diary-stats','diary-nbfilter','diary-tagfilter'].forEach(x=>$(x).classList.add('hidden'));
+    ['diary-list','diary-mood','diary-stats','diary-nbfilter','diary-tagfilter'].forEach(x=>$(x).classList.add('hidden')); { const sb=$('diary-streak'); if(sb) sb.innerHTML=''; }
     if(S.diaryAba==='humor'){ $('diary-mood').classList.remove('hidden'); Diary.renderHumor(); return; }
     if(S.diaryAba==='stats'){ $('diary-stats').classList.remove('hidden'); Diary.renderStats(); return; }
     $('diary-list').classList.remove('hidden'); $('diary-nbfilter').classList.remove('hidden'); $('diary-tagfilter').classList.remove('hidden');
+    { const sb=$('diary-streak'); if(sb) sb.innerHTML=Streak.badgeHtml(); }
     Diary.renderFiltros(); Diary.renderEntradas();
   },
   renderFiltros(){
@@ -1230,16 +1257,192 @@ const Diary={
     itens=itens.sort((a,b)=>(a.data+''+(a.hora||'')).localeCompare(b.data+''+(b.hora||'')));
     if(!itens.length){ toast('Nada encontrado para esse filtro'); return; }
     toast(`Gerando PDF · ${itens.length} página(s)…`);
-    let body='';
-    for(const r of itens){ let imgs=''; const f=await fotosDoRec(r); for(const u of f){ let src=u; if(u.startsWith('blob:')){ /* converte blob para dataURL */ } imgs+=`<img src="${src}" style="max-width:48%;border-radius:8px;margin:6px 4px 0 0">`; }
+    let body=''; let mesAtual=''; const sumario=[]; const mesesNome=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    for(const r of itens){
+      const mk=(r.data||'').slice(0,7); if(mk && mk!==mesAtual){ mesAtual=mk; const y=mk.slice(0,4),mo=parseInt(mk.slice(5,7),10)-1; const nomeMes=`${mesesNome[mo]||''} de ${y}`; sumario.push({id:'m-'+mk,nome:nomeMes}); body+=`<h2 class="mes-sep" id="m-${mk}">${nomeMes}</h2>`; }
+      let imgs=''; const f=await fotosDoRec(r); for(const u of f){ let src=u; if(u.startsWith('blob:')){ /* converte blob para dataURL */ } imgs+=`<img src="${src}" style="max-width:48%;border-radius:8px;margin:6px 4px 0 0">`; }
       // para blobs, precisamos do dataURL
       const ids=r.photoIds||(r.photoId?[r.photoId]:[]); if(ids.length){ imgs=''; for(const id of ids){ const b=await blobGet(id); if(b) imgs+=`<img src="${await blobToDataURL(b)}" style="max-width:48%;border-radius:8px;margin:6px 4px 0 0">`; } (r.photoUrls||[]).forEach(u=>imgs+=`<img src="${u}" style="max-width:48%;border-radius:8px;margin:6px 4px 0 0">`); }
       const tags=(r.tags||[]).map(t=>`#${t}`).join(' '); const nb=r.notebook?nbById(r.notebook):null;
       body+=`<div class="entry"><div class="ehead">${r.fav?'★ ':''}${r.mood!=null?MOODS[r.mood]+' ':''}${fmtBR(r.data)}${r.hora?' · '+r.hora:''}${nb?' · '+esc(nb.nome):''}</div>${r.titulo?`<h2>${esc(r.titulo)}</h2>`:''}${r.texto?`<div>${mdRender(r.texto)}</div>`:''}${tags?`<div class="tags">${tags}</div>`:''}${imgs}</div>`;
     }
-    const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Meu Diário</title><style>body{font-family:Georgia,serif;max-width:760px;margin:0 auto;padding:30px;color:#1a1a2e;line-height:1.6}h1{font-size:28px;text-align:center;margin-bottom:4px}.sub{text-align:center;color:#888;margin-bottom:30px;font-size:13px;font-family:Arial}.entry{margin-bottom:28px;padding-bottom:22px;border-bottom:1px solid #eee;page-break-inside:avoid}.ehead{font-family:Arial;font-size:13px;color:#2a9d8f;font-weight:bold;margin-bottom:6px}.entry h2{font-size:19px;margin:0 0 8px}.entry p{margin:0;white-space:pre-wrap}.tags{font-family:Arial;font-size:12px;color:#7c6cff;margin-top:8px}@media print{.noprint{display:none}}</style></head><body><h1>📔 Meu Diário</h1><div class="sub">${esc(S.user?.nome||'')} · ${itens.length} página(s) · ${new Date().toLocaleDateString('pt-BR')}</div><button class="noprint" onclick="window.print()" style="display:block;margin:0 auto 24px;padding:10px 22px;background:#6c5ce2;color:#fff;border:none;border-radius:8px;font-size:15px;font-family:Arial;cursor:pointer">🖨️ Imprimir / Salvar PDF</button>${body}</body></html>`;
+    const periodo=`${fmtBR(itens[0].data)} — ${fmtBR(itens[itens.length-1].data)}`;
+    const sumarioHtml=sumario.length>1?`<div class="sumario"><h3>Sumário</h3>${sumario.map(s=>`<a href="#${s.id}">${s.nome}</a>`).join('')}</div>`:'';
+    const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Meu Diário</title><style>body{font-family:Georgia,serif;max-width:760px;margin:0 auto;padding:30px;color:#1a1a2e;line-height:1.6}h1{font-size:28px;text-align:center;margin-bottom:4px}.sub{text-align:center;color:#888;margin-bottom:30px;font-size:13px;font-family:Arial}.capa{text-align:center;padding:120px 20px 80px;page-break-after:always}.capa .big{font-size:46px;margin:0 0 16px}.capa .nome{font-size:22px;color:#444;margin-bottom:8px}.capa .per{font-family:Arial;font-size:14px;color:#888}.sumario{page-break-after:always;padding:20px 0}.sumario h3{font-family:Arial;font-size:20px;border-bottom:2px solid #6c5ce2;padding-bottom:8px}.sumario a{display:block;font-family:Arial;font-size:15px;color:#6c5ce2;text-decoration:none;padding:7px 0;border-bottom:1px solid #eee}.mes-sep{font-size:24px;color:#6c5ce2;border-bottom:2px solid #6c5ce2;padding-bottom:6px;margin:34px 0 20px;page-break-before:always}.entry{margin-bottom:28px;padding-bottom:22px;border-bottom:1px solid #eee;page-break-inside:avoid}.ehead{font-family:Arial;font-size:13px;color:#2a9d8f;font-weight:bold;margin-bottom:6px}.entry h2{font-size:19px;margin:0 0 8px}.entry p{margin:0;white-space:pre-wrap}.tags{font-family:Arial;font-size:12px;color:#7c6cff;margin-top:8px}@media print{.noprint{display:none}}</style></head><body><button class="noprint" onclick="window.print()" style="position:fixed;top:14px;right:14px;padding:10px 22px;background:#6c5ce2;color:#fff;border:none;border-radius:8px;font-size:15px;font-family:Arial;cursor:pointer;z-index:9">🖨️ Imprimir / Salvar PDF</button><div class="capa"><div class="big">📔 Meu Diário</div><div class="nome">${esc(S.user?.nome||'')}</div><div class="per">${periodo}<br>${itens.length} página(s)</div></div>${sumarioHtml}${body}</body></html>`;
     const w=window.open('','_blank'); if(w){ w.document.write(html); w.document.close(); } else { const blob=new Blob([html],{type:'text/html'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`meu-diario-${todayStr()}.html`; a.click(); }
   }
+};
+
+/* ============================================================
+   v7 — Prompts, Modelos, Sequência de escrita, Clima
+   ============================================================ */
+const PROMPTS=[
+  'Qual foi o melhor momento do seu dia?',
+  'Pelo que você é grato(a) hoje?',
+  'O que te tirou do sério hoje — e por quê?',
+  'Que pequena vitória você teve hoje?',
+  'O que você aprendeu hoje?',
+  'Quem fez diferença no seu dia?',
+  'O que você faria diferente se pudesse repetir o dia?',
+  'Que pensamento não sai da sua cabeça?',
+  'O que você está adiando — e por quê?',
+  'Descreva seu dia em três palavras.',
+  'Que som, cheiro ou sabor marcou seu dia?',
+  'O que te deu energia hoje? E o que te esgotou?',
+  'Qual decisão você precisa tomar em breve?',
+  'O que você fez hoje só por você?',
+  'Qual hábito você quer fortalecer?',
+  'O que te deixou orgulhoso(a) recentemente?',
+  'Se hoje fosse uma cor, qual seria? Por quê?',
+  'O que você diria a si mesmo(a) de um ano atrás?',
+  'Qual desafio você está enfrentando agora?',
+  'O que te fez sorrir hoje?',
+  'Como está seu corpo hoje? E sua mente?',
+  'O que você quer lembrar deste dia daqui a 10 anos?',
+  'Qual conversa de hoje foi importante?',
+  'O que você está esperando com expectativa?',
+  'Que medo te impediu de algo hoje?',
+  'O que você leu, viu ou ouviu que te marcou?',
+  'Como você cuidou de alguém hoje?',
+  'O que está pesando no seu coração?',
+  'Qual foi o seu maior acerto da semana?',
+  'O que você quer deixar para trás?',
+  'Que escolha pequena melhorou seu dia?',
+  'O que você gostaria de ter dito e não disse?',
+  'Qual lugar te trouxe paz hoje?',
+  'O que você está construindo aos poucos?',
+  'Se pudesse mudar uma coisa em você, qual seria?',
+  'O que te surpreendeu hoje?'
+];
+const MODELOS={
+  'Gratidão':'🙏 Gratidão\n\nHoje sou grato(a) por:\n1. \n2. \n3. \n\nO melhor momento foi: ',
+  'Reflexão do dia':'📝 Reflexão\n\nComo foi meu dia: \nO que aprendi: \nO que faria diferente: \nPelo que sou grato(a): ',
+  'Viagem':'✈️ Viagem — \n\nOnde estive: \nO que vi: \nO que comi: \nMelhor momento: \nQuero lembrar de: ',
+  'Sonho':'🌙 Sonho\n\nO que sonhei: \nComo me senti: \nO que pode significar: ',
+  'Treino':'💪 Treino\n\nTipo: \nDuração: \nComo me senti: \nEvolução: ',
+  'Trabalho / Reunião':'💼 — \n\nParticipantes: \nDecisões: \nMinhas tarefas: \nPróximos passos: ',
+  'Metas da semana':'🎯 Metas\n\nEsta semana eu quero:\n1. \n2. \n3. \n\nComo vou começar: '
+};
+
+/* Sequência de escrita (dias seguidos com pelo menos 1 página de diário) + conquistas */
+const Streak={
+  diasComPagina(){ const set=new Set(); porTipo('diario').forEach(r=>{ if(r.data) set.add(r.data); }); return set; },
+  atual(){ const set=Streak.diasComPagina(); let s=0; let d=new Date(); d.setHours(0,0,0,0); const tem=ds=>set.has(ds); if(!tem(fmtDate(d))) d.setDate(d.getDate()-1); while(tem(fmtDate(d))){ s++; d.setDate(d.getDate()-1); } return s; },
+  recorde(){ const dias=[...Streak.diasComPagina()].sort(); if(!dias.length) return 0; let best=1,cur=1; for(let i=1;i<dias.length;i++){ const a=new Date(dias[i-1]+'T00:00:00'),b=new Date(dias[i]+'T00:00:00'); const diff=Math.round((b-a)/86400000); if(diff===1){ cur++; best=Math.max(best,cur); } else cur=1; } return best; },
+  totalPaginas(){ return porTipo('diario').length; },
+  conquistas(){
+    const tot=Streak.totalPaginas(), rec=Streak.recorde();
+    return [
+      {id:'p1',ic:'🌱',nome:'Primeira página',ok:tot>=1},
+      {id:'p10',ic:'📖',nome:'10 páginas',ok:tot>=10},
+      {id:'p50',ic:'📚',nome:'50 páginas',ok:tot>=50},
+      {id:'p100',ic:'🏆',nome:'100 páginas',ok:tot>=100},
+      {id:'s7',ic:'🔥',nome:'7 dias seguidos',ok:rec>=7},
+      {id:'s30',ic:'⭐',nome:'30 dias seguidos',ok:rec>=30},
+      {id:'s100',ic:'💎',nome:'100 dias seguidos',ok:rec>=100}
+    ];
+  },
+  badgeHtml(){ const s=Streak.atual(); if(s<2) return ''; return `<div style="background:linear-gradient(135deg,#ff9a56,#ff6a88);color:#fff;border-radius:12px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px;font-weight:700"><span style="font-size:22px">🔥</span><span>${s} dias seguidos escrevendo! Continue assim.</span></div>`; }
+};
+
+/* Clima automático via Open-Meteo (gratuito, sem chave) */
+const Clima={
+  emojiDoCodigo(c){ if(c===0) return '☀️'; if(c<=3) return '⛅'; if(c>=45&&c<=48) return '🌫️'; if(c>=51&&c<=67) return '🌧️'; if(c>=71&&c<=77) return '❄️'; if(c>=80&&c<=82) return '🌧️'; if(c>=85&&c<=86) return '❄️'; if(c>=95) return '⛈️'; return '⛅'; },
+  async detectar(){
+    if(!navigator.geolocation){ toast('Sem GPS neste aparelho'); return; }
+    toast('Detectando clima…');
+    navigator.geolocation.getCurrentPosition(async pos=>{
+      try{
+        const{latitude:la,longitude:lo}=pos.coords;
+        const r=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${la}&longitude=${lo}&current=temperature_2m,weather_code`);
+        const j=await r.json(); const c=j.current?j.current.weather_code:null; const t=j.current?Math.round(j.current.temperature_2m):null;
+        const emoji=Clima.emojiDoCodigo(c==null?2:c);
+        const el=document.querySelector(`#f-weather .cw[data-w="${emoji}"]`)||[...document.querySelectorAll('#f-weather .cw')].find(x=>x.textContent.trim()===emoji);
+        document.querySelectorAll('#f-weather .cw').forEach(b=>b.classList.remove('on')); if(el) el.classList.add('on'); S.formCtx.weather=emoji;
+        toast(t!=null?`Clima: ${emoji} ${t}°C`:`Clima: ${emoji}`);
+      }catch(e){ toast('Não consegui obter o clima'); }
+    },()=>toast('Permita a localização para detectar o clima'));
+  }
+};
+
+/* ============================================================
+   v7 — Insights: Ano em Pixels, Humor × Hábitos, Estatísticas de escrita
+   ============================================================ */
+const MOOD_CORES=['#ef4444','#f59e0b','#eab308','#84cc16','#22c55e']; // ruim → ótimo
+const Insights={
+  anoSel:new Date().getFullYear(),
+  // humor médio (0-4) de um dia, a partir das páginas de diário daquele dia
+  humorDoDia(ds){ const rs=porTipo('diario').filter(r=>r.data===ds && r.mood!=null); if(!rs.length) return null; return rs.reduce((s,r)=>s+r.mood,0)/rs.length; },
+  render(){
+    Insights.renderPixels(); Insights.renderHumorHabitos(); Insights.renderEscrita();
+  },
+  mudarAno(d){ Insights.anoSel+=d; Insights.renderPixels(); },
+  renderPixels(){
+    const ano=Insights.anoSel; const meses=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+    let grid='<div style="overflow-x:auto"><table style="border-collapse:collapse;font-size:9px"><tr><td></td>';
+    for(let d=1;d<=31;d++) grid+=`<td style="text-align:center;color:var(--txt3);width:15px">${d%2===1?d:''}</td>`;
+    grid+='</tr>';
+    let preenchidos=0;
+    for(let m=0;m<12;m++){
+      grid+=`<tr><td style="color:var(--txt2);padding-right:6px;white-space:nowrap">${meses[m]}</td>`;
+      for(let d=1;d<=31;d++){
+        const dt=new Date(ano,m,d);
+        if(dt.getMonth()!==m){ grid+='<td></td>'; continue; }
+        const ds=fmtDate(dt); const h=Insights.humorDoDia(ds);
+        const cor=h!=null?MOOD_CORES[Math.round(h)]:'var(--card2)';
+        const tit=h!=null?`${ds}: ${MOODS[Math.round(h)]}`:ds;
+        if(h!=null) preenchidos++;
+        grid+=`<td title="${tit}" onclick="Insights.irData('${ds}')" style="width:13px;height:13px;background:${cor};border:1px solid var(--bg);border-radius:3px;cursor:pointer"></td>`;
+      }
+      grid+='</tr>';
+    }
+    grid+='</table></div>';
+    const leg=MOODS.map((e,i)=>`<span style="display:inline-flex;align-items:center;gap:3px;font-size:11px"><span style="width:11px;height:11px;background:${MOOD_CORES[i]};border-radius:2px;display:inline-block"></span>${e}</span>`).join('');
+    $('ins-pixels').innerHTML=`<div class="card"><div class="cal-nav"><button onclick="Insights.mudarAno(-1)">‹</button><div class="mes">Ano em Pixels · ${ano}</div><button onclick="Insights.mudarAno(1)">›</button></div>${grid}<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:12px;justify-content:center">${leg}</div><div style="text-align:center;font-size:12px;color:var(--txt3);margin-top:8px">${preenchidos} dia(s) com humor registrado em ${ano}</div></div>`;
+  },
+  renderHumorHabitos(){
+    const habits=Track.habits(); const log=Track.habLog();
+    if(!habits.length){ $('ins-hh').innerHTML=`<div class="card"><div class="card-t">Humor × Hábitos</div><p style="color:var(--txt3);font-size:13px">Crie hábitos e registre seu humor no diário para ver aqui o que melhora seus dias.</p></div>`; return; }
+    // dias com humor
+    const diasHumor={}; porTipo('diario').forEach(r=>{ if(r.data&&r.mood!=null){ (diasHumor[r.data]=diasHumor[r.data]||[]).push(r.mood); } });
+    const mediaDia=ds=>{ const a=diasHumor[ds]; return a&&a.length?a.reduce((s,x)=>s+x,0)/a.length:null; };
+    const linhas=habits.map(h=>{
+      let com=[],sem=[];
+      for(const ds in diasHumor){ const md=mediaDia(ds); if(md==null) continue; const feito=log[ds]&&log[ds].includes(h.id); (feito?com:sem).push(md); }
+      const avg=a=>a.length?a.reduce((s,x)=>s+x,0)/a.length:null;
+      const ac=avg(com), as=avg(sem);
+      if(com.length<2){ return `<div style="padding:8px 0;border-bottom:1px solid var(--line)"><b>${h.emoji} ${esc(h.nome)}</b> <span style="color:var(--txt3);font-size:12px">— poucos dados ainda (${com.length} dia com humor)</span></div>`; }
+      let txt;
+      if(as==null) txt=`humor médio ${MOODS[Math.round(ac)]} nos dias que fez`;
+      else{ const dif=ac-as; const seta=dif>0.3?'📈 melhor':dif<-0.3?'📉 pior':'≈ parecido'; txt=`${MOODS[Math.round(ac)]} fazendo vs ${MOODS[Math.round(as)]} sem fazer · <b>${seta}</b>`; }
+      return `<div style="padding:8px 0;border-bottom:1px solid var(--line)"><b>${h.emoji} ${esc(h.nome)}</b><br><span style="font-size:13px;color:var(--txt2)">${txt}</span></div>`;
+    }).join('');
+    $('ins-hh').innerHTML=`<div class="card"><div class="card-t">Humor × Hábitos</div><p style="font-size:12px;color:var(--txt3);margin-bottom:6px">Comparando seu humor nos dias em que cumpriu cada hábito.</p>${linhas}</div>`;
+  },
+  renderEscrita(){
+    const itens=porTipo('diario'); const tot=itens.length;
+    const palavras=itens.reduce((s,r)=>s+((r.texto||'').trim()?(r.texto.trim().split(/\s+/).length):0),0);
+    const media=tot?Math.round(palavras/tot):0;
+    // por mês (12 meses do ano selecionado)
+    const ano=Insights.anoSel; const porMes=new Array(12).fill(0);
+    itens.forEach(r=>{ if(r.data&&r.data.startsWith(ano+'')){ const m=parseInt(r.data.slice(5,7),10)-1; if(m>=0&&m<12) porMes[m]++; } });
+    const maxM=Math.max(1,...porMes); const meses=['J','F','M','A','M','J','J','A','S','O','N','D'];
+    const bars=porMes.map((c,i)=>`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px"><div style="width:100%;background:var(--acc);border-radius:3px 3px 0 0;height:${Math.max(c/maxM*70,2)}px;opacity:${c?0.9:0.2}"></div><span style="font-size:9px;color:var(--txt3)">${meses[i]}</span></div>`).join('');
+    const conq=Streak.conquistas().map(c=>`<div style="text-align:center;opacity:${c.ok?1:0.28};flex:0 0 auto;width:64px"><div style="font-size:26px">${c.ic}</div><div style="font-size:9px;color:var(--txt2);line-height:1.1">${c.nome}</div></div>`).join('');
+    $('ins-escrita').innerHTML=`<div class="card"><div class="card-t">Sua escrita</div>
+      <div style="display:flex;gap:10px;text-align:center;margin-bottom:14px">
+        <div style="flex:1"><div style="font-size:24px;font-weight:800;color:var(--acc)">${tot}</div><div style="font-size:11px;color:var(--txt3)">páginas</div></div>
+        <div style="flex:1"><div style="font-size:24px;font-weight:800;color:var(--acc)">${Streak.atual()}</div><div style="font-size:11px;color:var(--txt3)">sequência</div></div>
+        <div style="flex:1"><div style="font-size:24px;font-weight:800;color:var(--acc)">${Streak.recorde()}</div><div style="font-size:11px;color:var(--txt3)">recorde</div></div>
+        <div style="flex:1"><div style="font-size:24px;font-weight:800;color:var(--acc)">${media}</div><div style="font-size:11px;color:var(--txt3)">palavras/pág</div></div>
+      </div>
+      <div style="font-size:12px;color:var(--txt2);margin-bottom:6px">Páginas por mês · ${ano}</div>
+      <div style="display:flex;gap:3px;align-items:flex-end;height:80px;margin-bottom:16px">${bars}</div>
+      <div style="font-size:12px;color:var(--txt2);margin-bottom:8px">Conquistas</div>
+      <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:4px">${conq}</div>
+    </div>`;
+  },
+  irData(ds){ S.calRef=new Date(ds+'T00:00:00'); App.go('s-cal'); setTimeout(()=>Cal.selecionar(ds),150); }
 };
 
 /* ---------- MODO FOCO ---------- */
@@ -1379,6 +1582,8 @@ const UI={
       <div class="fld"><label>Como foi seu dia?</label><div class="mood" id="f-mood">${MOODS.map((e,i)=>`<button class="${ed&&ed.mood===i?'on':''}" onclick="UI.moodPick(${i},this)">${e}</button>`).join('')}</div></div>
       <div class="fld"><label>Título</label><input id="f-titulo" value="${ed?esc(ed.titulo||''):''}" placeholder="Um título para hoje"></div>
       <div class="fld"><label>Texto</label>
+        <div class="btn-row" style="margin-bottom:8px"><button class="btn gho" type="button" onclick="UI.inspiracao()">💡 Inspiração</button><button class="btn gho" type="button" onclick="UI.usarModelo()">📋 Modelo</button></div>
+        <div id="f-prompt" style="display:none;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;font-size:13px;color:var(--txt2)"></div>
         <div class="fmt-bar">
           <button type="button" onclick="UI.fmt('**','**')"><b>B</b></button>
           <button type="button" onclick="UI.fmt('*','*')"><i>I</i></button>
@@ -1387,8 +1592,8 @@ const UI={
         </div>
         <textarea id="f-texto" style="min-height:140px" placeholder="Escreva livremente… **negrito**, *itálico*, ## título, - lista, #tags" oninput="UI.wordCount()">${ed?esc(ed.texto||''):''}</textarea>
         <div class="wc-line" id="f-wc"></div></div>
-      <div class="fld"><label>Como estava o tempo?</label><div class="chip-weather" id="f-weather">
-        ${['☀️','⛅','🌧️','⛈️','❄️','🌫️'].map(w=>`<div class="cw ${ed&&ed.weather===w?'on':''}" onclick="UI.weather('${w}',this)">${w}</div>`).join('')}</div></div>
+      <div class="fld"><label>Como estava o tempo? <button class="btn gho" type="button" style="padding:2px 10px;font-size:12px;width:auto;display:inline-block;margin-left:6px" onclick="Clima.detectar()">📍 Detectar</button></label><div class="chip-weather" id="f-weather">
+        ${['☀️','⛅','🌧️','⛈️','❄️','🌫️'].map(w=>`<div class="cw ${ed&&ed.weather===w?'on':''}" data-w="${w}" onclick="UI.weather('${w}',this)">${w}</div>`).join('')}</div></div>
       <div class="fld"><label>Com quem você estava? (opcional)</label><input id="f-people" value="${ed?esc(ed.people||''):''}" placeholder="Ex.: família, equipe, sozinho"></div>
       <div class="fld"><div class="btn-row"><button class="btn gho" onclick="UI.anexarFotos()">📷 Fotos</button><button class="btn gho" onclick="UI.anexarAudio()">🎙️ Áudio</button></div></div>
       <div class="fld"><div class="btn-row"><button class="btn gho" onclick="anexarArquivo()">📎 Arquivo</button><button class="btn gho" onclick="anexarVideo()">🎬 Vídeo</button><button class="btn gho" onclick="OCR.lerImagem()">🔎 OCR</button></div></div>
@@ -1397,6 +1602,9 @@ const UI={
   },
   moodPick(i,el){ document.querySelectorAll('#f-mood button').forEach(b=>b.classList.remove('on')); el.classList.add('on'); S.formCtx.mood=i; },
   weather(w,el){ const on=el.classList.contains('on'); document.querySelectorAll('#f-weather .cw').forEach(c=>c.classList.remove('on')); if(!on){ el.classList.add('on'); S.formCtx.weather=w; } else { S.formCtx.weather=null; } },
+  inspiracao(){ const box=$('f-prompt'); if(!box) return; const q=PROMPTS[Math.floor(Math.random()*PROMPTS.length)]; box.style.display='block'; box.innerHTML=`💭 <i>${esc(q)}</i> &nbsp;<button class="btn gho" type="button" style="padding:1px 8px;font-size:11px;width:auto;display:inline-block" onclick="UI.usarPrompt('${esc(q).replace(/'/g,'&#39;')}')">usar</button> <button class="btn gho" type="button" style="padding:1px 8px;font-size:11px;width:auto;display:inline-block" onclick="UI.inspiracao()">outra</button>`; },
+  usarPrompt(q){ const ta=$('f-texto'); if(!ta) return; const v=ta.value.trim(); ta.value=(v?v+'\n\n':'')+q+'\n'; ta.focus(); ta.selectionStart=ta.selectionEnd=ta.value.length; UI.wordCount&&UI.wordCount(); const b=$('f-prompt'); if(b) b.style.display='none'; },
+  usarModelo(){ const nomes=Object.keys(MODELOS); const lista=nomes.map((n,i)=>`${i+1}. ${n}`).join('\n'); const r=prompt('Escolha um modelo (número):\n\n'+lista,''); if(r===null) return; const idx=parseInt(r,10)-1; if(idx<0||idx>=nomes.length){ toast('Modelo inválido'); return; } const ta=$('f-texto'); if(!ta) return; const txt=MODELOS[nomes[idx]]; if(ta.value.trim() && !confirm('Isto vai substituir o texto atual. Continuar?')) return; ta.value=txt; ta.focus(); ta.selectionStart=ta.selectionEnd=txt.length; UI.wordCount&&UI.wordCount(); },
 
   novaFoto(){ UI.fecharSheet('novo'); Photo.capturar(); },
   formFoto(gps,ed){ S.formCtx={tipo:'foto',edit:ed?ed.id:null,photoBlobs:Photo.pendingBlobs||[],gps:gps||(ed?ed.gps:null),existingPhotoIds:ed?(ed.photoIds||(ed.photoId?[ed.photoId]:[])):[]}; $('form-title').textContent=ed?'Editar foto':'Foto com GPS';
@@ -1625,9 +1833,26 @@ const Reader={
       ${r.titulo?`<h1>${esc(r.titulo)}</h1>`:''}
       <div class="md-body">${mdRender(r.texto||'')}</div>
       ${imgs}`;
-    $('reader').classList.add('on');
+    $('reader').classList.add('on'); Reader.atual=r;
   },
-  fechar(){ $('reader').classList.remove('on'); }
+  fechar(){ $('reader').classList.remove('on'); },
+  card(){ const r=Reader.atual; if(!r){ toast('Abra uma página primeiro'); return; } Reader.gerarCard(r); },
+  gerarCard(r){
+    const W=1080,H=1080; const cv=document.createElement('canvas'); cv.width=W; cv.height=H; const x=cv.getContext('2d');
+    const g=x.createLinearGradient(0,0,W,H); g.addColorStop(0,'#6c5ce2'); g.addColorStop(1,'#2a9d8f'); x.fillStyle=g; x.fillRect(0,0,W,H);
+    x.fillStyle='rgba(255,255,255,0.10)'; x.fillRect(60,60,W-120,H-120);
+    x.fillStyle='#fff'; x.textBaseline='top';
+    // data + humor
+    x.font='500 34px Georgia, serif'; const dataTxt=(r.mood!=null?MOODS[r.mood]+'  ':'')+(nomeDiaCompleto?nomeDiaCompleto(r.data):fmtBR(r.data)); x.fillText(dataTxt,100,110);
+    // título
+    let y=200; if(r.titulo){ x.font='700 56px Georgia, serif'; y=Reader._wrap(x,r.titulo,100,y,W-200,64,2)+20; }
+    // texto (trecho)
+    x.font='400 40px Georgia, serif'; const corpo=(r.texto||'').replace(/[#*_>`-]/g,'').replace(/\n+/g,'\n').trim(); Reader._wrap(x,corpo||'—',100,y,W-200,56,11);
+    // rodapé
+    x.font='600 32px Arial, sans-serif'; x.fillStyle='rgba(255,255,255,0.92)'; x.fillText('📔 Meu Diário',100,H-110);
+    cv.toBlob(b=>{ if(!b){ toast('Não foi possível gerar'); return; } const file=new File([b],`diario-${r.data||'card'}.png`,{type:'image/png'}); if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){ navigator.share({files:[file],title:'Meu Diário'}).catch(()=>{}); } else { const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=file.name; a.click(); toast('Imagem baixada ✓'); } },'image/png');
+  },
+  _wrap(ctx,txt,x0,y0,maxW,lh,maxLines){ const palavras=(txt||'').split(/\s+/); let linha='',y=y0,linhas=0; for(let i=0;i<palavras.length;i++){ const teste=linha?linha+' '+palavras[i]:palavras[i]; if(ctx.measureText(teste).width>maxW && linha){ ctx.fillText(linha,x0,y); y+=lh; linhas++; linha=palavras[i]; if(linhas>=maxLines-1){ /* última linha */ let resto=palavras.slice(i).join(' '); while(ctx.measureText(resto+'…').width>maxW && resto.length){ resto=resto.slice(0,-1); } ctx.fillText(resto+(palavras.slice(i).join(' ').length>resto.length?'…':''),x0,y); return y+lh; } } else linha=teste; } if(linha) ctx.fillText(linha,x0,y); return y+lh; }
 };
 
 /* ---------- LINHA DO TEMPO ---------- */
