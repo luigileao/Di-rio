@@ -1,6 +1,17 @@
-# 📔 Meu Diário — PWA (v7.0)
+# 📔 Meu Diário — PWA (v8.0)
 
 Diário pessoal **offline-first** para **PC, iPad, Android e iPhone**: calendário, lembretes por voz, diário com humor, hábitos e medidas, fotos com GPS, marcação nas fotos, mapa, linha do tempo, estatísticas e **sincronização com conta (login e senha)**.
+
+## 🧮 Calculadoras (v8)
+
+Nova aba **Calculadoras** em **Hábitos & Medidas**, com um cartão **"Seus dados"** (sexo, idade, altura, peso) que as ferramentas reaproveitam:
+- **IMC** — índice + faixa de peso saudável para a altura.
+- **Hidratação** — estimativa de água por dia.
+- **Frequência cardíaca de treino** — zonas de bpm pela idade.
+- **Relação cintura–quadril** — referência cardiovascular.
+- **Idade exata** e **Contador de dias** (entre datas / até um evento).
+
+Os resultados são estimativas de referência e não substituem a avaliação de um profissional de saúde. Os dados ficam salvos apenas no aparelho.
 
 ## 🆕 Novidades da v7
 

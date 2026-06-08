@@ -701,9 +701,11 @@ input,textarea,select{font-family:inherit;font-size:var(--fs)}
     <div class="seg" id="trk-seg">
       <button class="on" onclick="Track.aba('habitos',this)">Hábitos</button>
       <button onclick="Track.aba('medidas',this)">Medidas</button>
+      <button onclick="Track.aba('calc',this)">Calculadoras</button>
     </div>
     <div id="trk-habitos"></div>
     <div id="trk-medidas" class="hidden"></div>
+    <div id="trk-calc" class="hidden"></div>
   </div>
 </div>
 
@@ -783,7 +785,7 @@ input,textarea,select{font-family:inherit;font-size:var(--fs)}
    geocodificação reversa, múltiplas fotos, cadernos/categorias,
    favoritos, aviso de conflito de sync, modo foco.
    ============================================================ */
-const VER='7.0';
+const VER='8.0';
 const LS={ user:'md_user', recs:'md_recs', cfg:'md_cfg', sync:'md_lastsync', theme:'md_theme', fs:'md_fs', pin:'md_pin', nb:'md_notebooks' };
 // Configuração de nuvem pré-definida (Supabase). A chave anon é pública por design
 // e protegida por RLS no servidor. Pode ser sobrescrita em Perfil → Sincronização.
@@ -1445,6 +1447,133 @@ const Insights={
   irData(ds){ S.calRef=new Date(ds+'T00:00:00'); App.go('s-cal'); setTimeout(()=>Cal.selecionar(ds),150); }
 };
 
+/* ============================================================
+   v8 — Calculadoras (saúde + utilidades)
+   Observação: resultados são estimativas de referência e não
+   substituem a avaliação de um profissional de saúde.
+   ============================================================ */
+const LS_CALC='md_calc';
+const Calc={
+  perfil(){ try{ return JSON.parse(localStorage.getItem(LS_CALC)||'{}'); }catch{ return {}; } },
+  salvarPerfil(){ const p={ sexo:($('calc-sexo')?.value)||'m', idade:Calc._n('calc-idade'), altura:Calc._n('calc-altura'), peso:Calc._n('calc-peso') }; localStorage.setItem(LS_CALC,JSON.stringify(p)); },
+  _n(id){ const v=($(id)?.value||'').toString().replace(',','.'); const n=parseFloat(v); return isNaN(n)?null:n; },
+  _res(id,html){ const el=$(id); if(el){ el.innerHTML=html; el.style.display='block'; } },
+  nota:'<div style="font-size:11px;color:var(--txt3);margin-top:8px">Estimativa de referência — não substitui a avaliação de um profissional de saúde.</div>',
+
+  render(){
+    const p=Calc.perfil();
+    const sx=s=>p.sexo===s?'selected':'';
+    $('trk-calc').innerHTML=`
+      <div class="card"><div class="card-t">👤 Seus dados</div>
+        <p style="font-size:12px;color:var(--txt3);margin-bottom:10px">Preencha uma vez; as calculadoras abaixo usam estes valores. Fica salvo só neste aparelho.</p>
+        <div class="row">
+          <div><label>Sexo</label><select id="calc-sexo" onchange="Calc.salvarPerfil()"><option value="m" ${sx('m')}>Masculino</option><option value="f" ${sx('f')}>Feminino</option></select></div>
+          <div><label>Idade</label><input id="calc-idade" type="number" inputmode="numeric" value="${p.idade??''}" oninput="Calc.salvarPerfil()" placeholder="anos"></div>
+        </div>
+        <div class="row">
+          <div><label>Altura (cm)</label><input id="calc-altura" type="number" inputmode="decimal" value="${p.altura??''}" oninput="Calc.salvarPerfil()" placeholder="ex.: 175"></div>
+          <div><label>Peso (kg)</label><input id="calc-peso" type="number" inputmode="decimal" value="${p.peso??''}" oninput="Calc.salvarPerfil()" placeholder="ex.: 72"></div>
+        </div>
+      </div>
+
+      <div class="card"><div class="card-t">⚖️ IMC — Índice de Massa Corporal</div>
+        <p style="font-size:12px;color:var(--txt3);margin-bottom:10px">Usa seu peso e altura acima.</p>
+        <button class="btn" onclick="Calc.imc()">Calcular IMC</button>
+        <div id="calc-imc-res" style="display:none;margin-top:12px"></div>
+      </div>
+
+      <div class="card"><div class="card-t">💧 Hidratação diária</div>
+        <p style="font-size:12px;color:var(--txt3);margin-bottom:10px">Estimativa geral de ingestão de água a partir do seu peso.</p>
+        <button class="btn" onclick="Calc.agua()">Calcular</button>
+        <div id="calc-agua-res" style="display:none;margin-top:12px"></div>
+      </div>
+
+      <div class="card"><div class="card-t">❤️ Frequência cardíaca de treino</div>
+        <p style="font-size:12px;color:var(--txt3);margin-bottom:10px">Zonas de batimento por minuto a partir da sua idade.</p>
+        <button class="btn" onclick="Calc.fc()">Calcular zonas</button>
+        <div id="calc-fc-res" style="display:none;margin-top:12px"></div>
+      </div>
+
+      <div class="card"><div class="card-t">📏 Relação cintura–quadril</div>
+        <p style="font-size:12px;color:var(--txt3);margin-bottom:10px">Indicador de distribuição de gordura (referência cardiovascular).</p>
+        <div class="row">
+          <div><label>Cintura (cm)</label><input id="calc-cintura" type="number" inputmode="decimal" placeholder="ex.: 84"></div>
+          <div><label>Quadril (cm)</label><input id="calc-quadril" type="number" inputmode="decimal" placeholder="ex.: 98"></div>
+        </div>
+        <button class="btn" onclick="Calc.cq()">Calcular</button>
+        <div id="calc-cq-res" style="display:none;margin-top:12px"></div>
+      </div>
+
+      <div class="card"><div class="card-t">🎂 Idade exata</div>
+        <div class="fld"><label>Data de nascimento</label><input id="calc-nasc" type="date"></div>
+        <button class="btn" onclick="Calc.idade()">Calcular</button>
+        <div id="calc-idade-res" style="display:none;margin-top:12px"></div>
+      </div>
+
+      <div class="card"><div class="card-t">📆 Contador de dias</div>
+        <p style="font-size:12px;color:var(--txt3);margin-bottom:10px">Dias entre duas datas (ex.: desde um marco, ou até um evento).</p>
+        <div class="row">
+          <div><label>De</label><input id="calc-d1" type="date"></div>
+          <div><label>Até</label><input id="calc-d2" type="date" value="${todayStr()}"></div>
+        </div>
+        <button class="btn" onclick="Calc.dias()">Calcular</button>
+        <div id="calc-dias-res" style="display:none;margin-top:12px"></div>
+      </div>
+    `;
+  },
+
+  imc(){
+    const p=Calc.perfil(); const peso=p.peso, altcm=p.altura;
+    if(!peso||!altcm){ toast('Preencha peso e altura em "Seus dados"'); return; }
+    const a=altcm/100; const v=peso/(a*a);
+    const cat=v<18.5?'abaixo do peso':v<25?'peso normal':v<30?'sobrepeso':v<35?'obesidade grau I':v<40?'obesidade grau II':'obesidade grau III';
+    const cor=v<18.5?'#3b82f6':v<25?'#22c55e':v<30?'#eab308':'#ef4444';
+    const fmin=(18.5*a*a), fmax=(24.9*a*a);
+    Calc._res('calc-imc-res',`<div style="text-align:center"><div style="font-size:40px;font-weight:800;color:${cor}">${v.toFixed(1)}</div><div style="font-size:14px;color:var(--txt2)">${cat}</div></div><div style="font-size:13px;color:var(--txt2);margin-top:10px">Faixa de peso saudável para sua altura: <b>${fmin.toFixed(1)}–${fmax.toFixed(1)} kg</b> (IMC 18,5–24,9).</div>${Calc.nota}`);
+  },
+
+  agua(){
+    const p=Calc.perfil(); if(!p.peso){ toast('Preencha o peso em "Seus dados"'); return; }
+    const ml=Math.round(p.peso*35); const l=(ml/1000).toFixed(1);
+    Calc._res('calc-agua-res',`<div style="text-align:center"><div style="font-size:34px;font-weight:800;color:#3b82f6">${l} L</div><div style="font-size:13px;color:var(--txt2)">por dia (~${ml} ml)</div></div><div style="font-size:12px;color:var(--txt3);margin-top:8px">A necessidade varia com clima, atividade e saúde.</div>${Calc.nota}`);
+  },
+
+  fc(){
+    const p=Calc.perfil(); if(!p.idade){ toast('Preencha a idade em "Seus dados"'); return; }
+    const max=Math.round(220-p.idade);
+    const z=[['Aquecimento',50,60],['Leve / recuperação',60,70],['Aeróbica',70,80],['Intensa',80,90],['Máxima',90,100]];
+    const linhas=z.map(([n,a,b])=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line)"><span style="font-size:13px">${n}</span><span style="font-size:13px;font-weight:700">${Math.round(max*a/100)}–${Math.round(max*b/100)} bpm</span></div>`).join('');
+    Calc._res('calc-fc-res',`<div style="text-align:center;margin-bottom:10px"><div style="font-size:30px;font-weight:800;color:#ef4444">${max} bpm</div><div style="font-size:13px;color:var(--txt2)">frequência máxima estimada</div></div>${linhas}${Calc.nota}`);
+  },
+
+  cq(){
+    const c=Calc._n('calc-cintura'), q=Calc._n('calc-quadril'); const p=Calc.perfil();
+    if(!c||!q){ toast('Informe cintura e quadril'); return; }
+    const r=c/q; const m=p.sexo!=='f';
+    let faixa,cor; if(m){ faixa=r<0.90?'baixo':r<1.0?'moderado':'aumentado'; } else { faixa=r<0.80?'baixo':r<0.85?'moderado':'aumentado'; }
+    cor=faixa==='baixo'?'#22c55e':faixa==='moderado'?'#eab308':'#ef4444';
+    Calc._res('calc-cq-res',`<div style="text-align:center"><div style="font-size:34px;font-weight:800;color:${cor}">${r.toFixed(2)}</div><div style="font-size:13px;color:var(--txt2)">risco ${faixa}</div></div>${Calc.nota}`);
+  },
+
+  idade(){
+    const v=$('calc-nasc')?.value; if(!v){ toast('Informe a data de nascimento'); return; }
+    const n=new Date(v+'T00:00:00'), h=new Date(); if(n>h){ toast('Data no futuro'); return; }
+    let anos=h.getFullYear()-n.getFullYear(), meses=h.getMonth()-n.getMonth(), dias=h.getDate()-n.getDate();
+    if(dias<0){ meses--; dias+=new Date(h.getFullYear(),h.getMonth(),0).getDate(); }
+    if(meses<0){ anos--; meses+=12; }
+    const totalDias=Math.floor((h-n)/86400000);
+    Calc._res('calc-idade-res',`<div style="text-align:center"><div style="font-size:30px;font-weight:800;color:var(--acc)">${anos} anos, ${meses} ${meses===1?'mês':'meses'} e ${dias} ${dias===1?'dia':'dias'}</div><div style="font-size:13px;color:var(--txt2);margin-top:4px">${totalDias.toLocaleString('pt-BR')} dias vividos</div></div>`);
+  },
+
+  dias(){
+    const d1=$('calc-d1')?.value, d2=$('calc-d2')?.value; if(!d1||!d2){ toast('Informe as duas datas'); return; }
+    const a=new Date(d1+'T00:00:00'), b=new Date(d2+'T00:00:00');
+    const dias=Math.round(Math.abs(b-a)/86400000); const sem=Math.floor(dias/7);
+    const futuro=b>a && b>new Date(); const rel=b<a?'atrás':'';
+    Calc._res('calc-dias-res',`<div style="text-align:center"><div style="font-size:34px;font-weight:800;color:var(--acc)">${dias.toLocaleString('pt-BR')} dias</div><div style="font-size:13px;color:var(--txt2)">${sem} semana(s) e ${dias%7} dia(s)${futuro?' restante(s)':rel?' atrás':''}</div></div>`);
+  }
+};
+
 /* ---------- MODO FOCO ---------- */
 const Focus={
   abrir(){ $('focus-date').textContent=nomeDiaCompleto(todayStr()); $('focus-text').value=''; $('focus-mode').classList.add('on'); setTimeout(()=>$('focus-text').focus(),200); },
@@ -2030,7 +2159,7 @@ const Track={
   metLog(){ try{ return JSON.parse(localStorage.getItem(LS_METLOG)||'{}'); }catch{ return {}; } },
   saveHab(a){ localStorage.setItem(LS_HAB,JSON.stringify(a)); }, saveHabLog(o){ localStorage.setItem(LS_HABLOG,JSON.stringify(o)); },
   saveMet(a){ localStorage.setItem(LS_MET,JSON.stringify(a)); }, saveMetLog(o){ localStorage.setItem(LS_METLOG,JSON.stringify(o)); },
-  aba(a,el){ document.querySelectorAll('#trk-seg button').forEach(b=>b.classList.remove('on')); el.classList.add('on'); $('trk-habitos').classList.toggle('hidden',a!=='habitos'); $('trk-medidas').classList.toggle('hidden',a!=='medidas'); a==='habitos'?Track.renderHabitos():Track.renderMedidas(); },
+  aba(a,el){ document.querySelectorAll('#trk-seg button').forEach(b=>b.classList.remove('on')); el.classList.add('on'); $('trk-habitos').classList.toggle('hidden',a!=='habitos'); $('trk-medidas').classList.toggle('hidden',a!=='medidas'); $('trk-calc').classList.toggle('hidden',a!=='calc'); if(a==='habitos') Track.renderHabitos(); else if(a==='medidas') Track.renderMedidas(); else Calc.render(); },
   render(){ $('trk-sub').textContent=`${Track.habits().length} hábito(s) · ${Track.metrics().length} medida(s)`; Track.renderHabitos(); },
   // ---- Hábitos (sim/não diário) ----
   streak(hid){ const log=Track.habLog(); let s=0; let d=new Date(); d.setHours(0,0,0,0); const done=ds=>log[ds]&&log[ds].includes(hid); if(!done(fmtDate(d))) d.setDate(d.getDate()-1); while(done(fmtDate(d))){ s++; d.setDate(d.getDate()-1); } return s; },
